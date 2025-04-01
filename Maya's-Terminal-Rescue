@@ -1,0 +1,44 @@
+Pwn: Maya's Terminal Rescue
+
+"""
+Maya was doing some indepth research and stated that she discovered some
+really important intel regarding Loab. Howevever, something happened and we
+lost contact with her.
+Our operatives are currently tracing her down, but Loab seems to have caught
+on. Whatever the case is, we NEED to gain access to that information before
+she finds it and wipes it from us.
+We have all of Maya's login credentials, but she seems to have implemented her
+own login mechanism that we can't seem to figure out.
+Think you can help?
+
+https://jerseyctf.ctfd.io/files/e8cf1d7b60c6be92fc5d616e64c98cd1/terminal_resc
+ue?token=eyJ1c2VyX2lkIjo1Nzc0LCJ0ZWFtX2lkIjoxODg3LCJmaWxlX2lkIjoyMjh9.Z-kCfw.1
+IRXwDyNFEYp-0FbtG5kcP6mvcs
+"""
+
+Putting the binary through your favorite reversing tool, we can see that the
+code roughly does the following:
+
+1. Prints out a password prompt
+2. Checks the input one byte at a time
+3. If the input byte doesn't match the correct password, return failure
+4. If we checked enough bytes for the entire password, return success
+
+What's key here is that we can utilize this as an oracle. Since the return
+immediately upon failure, one would hope to find a way to distinguish when
+the return occurs. Luckily for us, we can do exactly that!
+
+By entering several characters at once and then pressing enter, getbyte
+now has a backlog of bytes to get, so it will run the checking function
+multiple times, and report failure every time we get it wrong. However,
+if we get all of the characters correct, the checking function will
+continue waiting for the next character in the password, and therefore does
+not print the password prompt. So with this, we can just try all 1-byte 
+passwords until we don't see the password prompt again, and then we know
+that that byte is the correct first character. This gives us a way to brute
+force the passwword, one character at a time.
+
+After we brute force the password, we get a shell. The flag is located in
+the same directory as we are.
+
+------------------------------------------------------------------------------
