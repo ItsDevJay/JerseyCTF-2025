@@ -1,0 +1,14 @@
+Solution Steps
+
+    The docker repo here will be public, containing an image for the forensics challenge.
+    To find it you have some choices - using g0ldenfalc0n7 as a search term, you could search blindly.
+    We also have the forums! Heading to the forums you'll find G0ldenFalc0n7 has posted a lot of social media links, one being docker.
+    The Docker repo is found here.
+
+For visibility into this search from a rev standpoint:
+
+    You can start using whatsmyname.app and type in g0ldenfalc0n7. There's a lot that populates, but in my example I see Dockerhub right away.
+    This has one repo and that's where the flag will be.
+
+You can also go to the forums and click on g0ldenfalc0n7's profile where you'll find a lot of social media links. One of them is Dockerhub. Viola. Easy-ish.
+The flag is the description there
