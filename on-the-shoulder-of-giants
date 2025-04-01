@@ -1,0 +1,19 @@
+On the Shoulders of Giants
+
+I searched the phrase "machine learning researchers are not good programmers" on Google and found a paper on machine learning
+
+https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=7e5b5ed4c4f56319920efb4bd866f1d7157c4e3e
+
+The prompt mentioned Osiris Lab which is in NYU, so the target must be associated with NYU. Searching for "NYU" I found a professor named "Yann LeCun"
+
+Looking him up i found his website http://yann.lecun.com/ex/ex/index.html
+
+In hobbies section i only found 2 hobbies so I tried searching about his "evil brother" on the site and found a section referring to phillipe kahn http://yann.lecun.com/ex/ex/ex/fun/index.html#kahn.html
+
+At the very bottom he talks about similarities between him and phillipe and mentions 3 favorite activities that they have in common
+
+"Our favorite activities are hacking, racing sailboats, and playing Jazz on wind instruments."
+
+Putting the hobbies in the flag format we get:
+
+pctfv{hacking_racing-sailboats_playing-jazz-on-wind-instruments}
