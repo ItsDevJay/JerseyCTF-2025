@@ -1,4 +1,26 @@
-1. find the location with the clues given in the photo
-2. a quick google image search helps
-3. find the exact spot and go to what3words.com and then get the three words for the spot
-it might take a while
+OSINT: Where Am I
+
+We intercepted this picture from D00mSay3r - Says they were visiting a friend.
+Can you narrow it down for us? Get as exact as you can - we need to follow
+their footsteps. Use 3 words to describe the exact location that this photo
+was taken.
+
+https://jerseyctf.ctfd.io/files/2963233e65538b73e360fe96e1b4c83c/where-am-i.jp
+g?token=eyJ1c2VyX2lkIjo1Nzc0LCJ0ZWFtX2lkIjoxODg3LCJmaWxlX2lkIjoyNTB9.Z-jfGg.PH
+af1fWhXmZrYcklMlrveoCotMg
+
+The challenge description hints that we want to use what3words.com to locate
+a photograph. In the actual photo, a couple of things are key:
+
+1. The US and Texas flags are clearly visible in front of the hotel.
+2. "Aust" is visible on the parking banner, suggesting the picture is in
+Austin, Texas.
+3. The street name ends in "Springs", suggesting the location may have to do
+with Barton Springs, a region in Austin.
+
+While the location is not in Barton Springs, it is in the downtown area
+located on Barton Springs Road. We can confirm this by looking at the hotels
+in Austin.
+
+Finally, we can locate the spot on the Yeti patio where the picture was taken
+using satellite view.
