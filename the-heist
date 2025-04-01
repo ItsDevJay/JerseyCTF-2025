@@ -1,0 +1,9 @@
+The-Heist
+
+Open the given link: http://the-heist.aws.jerseyctf.com/
+
+Use the Endpoint: /vault
+
+Once used that endpoint put in the request headers in burpsuite: X-Forwarded-For: 203.0.113.50
+
+This will bypass IP detection and give you the flag.
