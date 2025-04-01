@@ -1,0 +1,24 @@
+Solution Steps
+
+    Few key parts here:
+        First, tinker tailor soldier spy , but not a tinker? Hercules Mulligan fought in a battle, but he was also a tailor and spy in the American Revolution.
+        Second, "the spy would mark the spot", referencing the "marker"... aka a historical marker.
+        However, if that wasn't clear, they could just search "disparaging remarks about his father" and duel, which shows Philip Hamilton as the second result. That said, these were my steps:
+
+    Path One:
+        Start by searching for "first spies in us history"
+        End up on the wikipedia for List of American Spies.
+        See Hercules Mulligan, find a historical marker for them
+        Head to the Historical Marker Database
+        Search each one, sure, but the first one listed in Herculues Mulligan who was a tailor and spy
+
+    Path Two:
+        Search for "disparaging remarks about his father" and duel.
+        Find Philip Hamilton's historical marker
+        This states he has 8 others within walking distance, but Heruclues Mulligan is only a few steps away.
+
+    Once you find the marker it provides coordinates in DMS, but we need DD
+
+    40° 42.47′ N, 74° 0.739′ W converts to 40.707833, -74.012317 in google. Other platforms may incorrectly round which provides borked coordinates. So you've gotta check your work. Of course, just googling the coords would get you there.
+
+    The flag is Mulligan, 40.707833, -74.012317 (but no spaces, as the format states)
