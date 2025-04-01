@@ -1,0 +1,12 @@
+Bearer-of-Bad-News
+
+Sign in with the credentials:
+Username: user Password: ihavebadnews
+
+Once signed in look at request headers and you'll notice a JWT token starting with 'ey'
+
+From the URL secret you get a secret key for signing the JWT token (without this you will be faced with 'the cake is fake' meaning that your JWT is not valid and not signed
+
+Used cyberchef to validate the JWT token by copy and pasting the headers and body and then changing the admin status from false to true
+
+From there replace the JWT token and your in! CTF Complete.
