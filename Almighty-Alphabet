@@ -1,0 +1,17 @@
+Crypto: Almighty - Alphabet
+
+"""
+The criminal alphabet, the noir alphabet, the alphabet of a private detective,
+and whatnot, but there is still something mystical that doesn't look like an
+alphabet, but at the same time it hides the magical message.
+
+https://jerseyctf.ctfd.io/files/be2412fe1e6cac04a88cbfe4a48dfb05/solveit.png?t
+oken=eyJ1c2VyX2lkIjo1Nzc0LCJ0ZWFtX2lkIjoxODg3LCJmaWxlX2lkIjoxOTV9.Z-jPKg.GZnjM
+ps85tVAN0rRcdRtBHlrKjM
+"""
+
+The image is a hexahue encoding. Simply type all the 2x3 squares into an
+online decoder, wrap it in the flag format, find out it doesn't work, and then
+guess what the actual order of the words is supposed to be with no indication.
+
+------------------------------------------------------------------------------
