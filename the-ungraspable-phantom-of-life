@@ -1,0 +1,15 @@
+Solution Steps
+
+    The docker image discovered in the previous challenge must be used to solve this challenge.
+    The actual solution steps are simple: Inspect the docker image. 
+    Start by pulling it, and running it, then find things out of place.
+    The first flag is hidden within /home/GF7/.ssh/authorized_keys amongst a few dozen other keys.
+    The actual flag is hidden within the ssh-key hidden on the docker image.
+    NOTE: THEY NEED THE PRIVATE KEY FOR THE NEXT CHALLENGE!!!
+    Some custom binaries are on here as well, but ultimately that's just misdirection.
+    The second flag is hidden in an ENV variable that wasn't listed in the dockerfile.
+    To access that, you can type printenv or env or echo $FLAG_PART2 while in the container and you'll get that second half.
+    Combine the two flags to one whole flag: jctfv{1n_h15 + _1nfallibl3_wak3} 
+
+
+** This was the 2nd part which followed up simon and the whale **
