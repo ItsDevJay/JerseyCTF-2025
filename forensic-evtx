@@ -1,0 +1,5 @@
+1. download the file and open it, it will bring you to the event viewer
+2. identify the event ID the indicated a failed login
+3. See which event user has had a repeated login error in a row
+4. Identify user and the amount of times the login has failed
+🙂 done
