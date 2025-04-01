@@ -1,0 +1,14 @@
+Misc: Sounds-secure
+
+"""
+An Agent has left you a message that they received.
+Your goal, listen and look at the clues with the file to lead you to the flag.
+
+https://jerseyctf.ctfd.io/files/44020399293036382be042394ebf966e/sounds_secure
+.mp3?token=eyJ1c2VyX2lkIjo1Nzc0LCJ0ZWFtX2lkIjoxODg3LCJmaWxlX2lkIjoyMDR9.Z-jQKg
+.w_Z89wMgyqNO5VEHwFqwXsZ2Pvw
+"""
+
+`strings sounds_secure.mp3 | grep jctfv`
+
+------------------------------------------------------------------------------
