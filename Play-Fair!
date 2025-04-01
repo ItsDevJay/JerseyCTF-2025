@@ -1,0 +1,3 @@
+reconstructed the same t table using the same random seed.
+Instead of shifting right/down, I shifted left/up reversing the logic.
+Wrote the decryption logic by inverting the Playfair rules.
