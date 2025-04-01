@@ -1,0 +1,15 @@
+The midi files use a form of steganography related to hexadecimal.
+
+If you were to observe the midi file anywhere and physically see the notes, eventually, it would be obvious that the notes themselves encode the message, with 2 "beats" being either:
+
+    two different tones (one per each ascii 'digit')
+        if the value was a number, it would use the letter "G" (since this is not a hexadecimal letter), and then have the octave be the number/digit
+        if the value was a letter, it would use the letter and then have the octave be 0. but since this is one "beat" instead of two, it would be obvious that this isn't the same as the case below.
+    one single tone (where the note "E4", for example, would mean the literal hexadecimal number "e4")
+
+So, in order to actually obtain the flag:
+
+    The flag is encrypted in AES ECB (it's the "access_token" file in the intercepted.zip file), where the AES key (there's no IV) is a sha256 hash (as taken from the "256 bits of security" portion in the description).
+    Using the above logic, each midi file, upon decryption, will be a hyphen-deliminated series of words (passphrase). Upon decryption of all the midi files, we'll have a wordlist of potential "keys" we can use for the AES.
+    We try each key by taking the sha256 hash of it, putting that 256 bit hash as the AES key for ECB, then decrypting the flag.
+    Only one of these passphrases will be successful, and upon decrypting with that key, it will reveal the flag for us.
