@@ -1,0 +1,11 @@
+1. Listen to the file, they are DTMF tone (Dual-Tone Multi-Frequency). They should sound familiar, they are the sounds that a telephone make when you enter a digit.
+Note: This may be guessy but you could easily google "What are telephone tones" or "sound of digits telephone make" on Google and find the answer. However, I will include the hint of "What are the sounds called when you enter in digits on an older telephones called"
+
+2. Go online to your DMTF decoder, any will work I used this one: https://dtmf.netlify.app/
+
+3. You will be given a series of ASCII characters, go to your favorite decoder and decode it, I used this: https://www.dcode.fr/ascii-code
+
+Note: Dcode can also analyze the cipher or encoding if you were unsure what type of encoding it was
+
+4. After translating it you will get binary, translate that back to ascii and you will get the flag
+Note: The reason it goes back to ascii is because the DMTF maps tones to ascii characters
