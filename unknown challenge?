@@ -1,0 +1,43 @@
+Solution Steps
+Note in my solution steps I specify the full path for the files
+
+REDACTED
+
+REDACTED
+
+Upon opening the file you will see the entire user folder for johndoe
+
+The encrypted flag and additional files are located in C:\Users\johndoe\Desktop. This directory contains the flag.txt.ecc file.
+
+You need to do some OSINT. First, figure out which malware threat group hit the machine. There are plenty of websites to validate but I used:
+
+https://id-ransomware.malwarehunterteam.com/
+
+
+Once there upload the ransom note HELP_TO_DECRYPT_YOUR_FILES.txt and the flag.txt.ecc file. It will tell you that your machine has been infected with TeslaCryptXXX. Then it will tell you that there is a decryption tool available for it.
+
+If you click on the link it will redirect you to an article which explains step by step how to decrypt the encrypted files.
+
+https://www.bleepingcomputer.com/forums/t/576600/tesladecoder-released-to-decrypt-exx-ezz-ecc-files-encrypted-by-teslacrypt/
+
+
+Download the zip
+
+http://download.bleepingcomputer.com/BloodDolly/TeslaDecoder.zip
+
+Now that you have the zip, you need to understand the tool. Yes there was a master decryption key released, however, it does not work for all versions. And the version of the ransomware is unknown. After researching a little, you will see that the tool can also use the key.dat file that gets installed when the malware encrypts the files.
+
+Research where teslacrypt usually stores the key.dat file (C:\Users\johndoe%APPDATA%\roaming) and copy it off the image along with flag.txt.ecc if you have not done so already.
+
+Using the tesla decoder tool that you downloaded off of the forum, you want to "Load data file" select the key.dat file you just took off the compromised machine.
+
+Finally, after you load the data file, select Decrypt folder and select the folder with the encrypted file. It will decrypt the file and you have the flag.
+
+Rabbit Holes
+The master encryption key posted online will not work for this ransomware
+
+The other encrypted files have no meaning, I just put them their for effect.
+
+The link file in the Desktop folder is a hint for the participants on the malware type
+
+I could not get most of the online decryption tools for the AV companies to work
