@@ -1,0 +1,54 @@
+Jail Break (Pwn? Not really)
+
+It's my last CTF challenge I'm making for JCTF, why not make it make people hate their lives?
+We start with this opening after my other 2 challenges: the ungraspable phantom of life and simon and the whale must be completed first.
+Start by nc'ing to the server. Simple: nc <IP> <PORT>
+Now you're in the C2 server... or, are you? No, you're in jail. You should figure that out soon enough. You can't leave. You can't escape.  You can't even get out of bed. Yet, you must.
+There are limited commands you can run, but I tried to make this part really easy!
+I did attempt to give busybox, which is a minimalist version of the Linux command line tools, alongside ls, grep, cat, and a couple of others. Busybox alone has a ton of usability. However, because busybox/vi needs TTY and that gives SO many issues when forcing nc people into a container, I created a python program for them to use. They'll have to copy and paste each line of the the private key. Once they do so it'll show up in /tmp/messages/whatevernametheygave.
+The jail is pretty locked down, but there are two areas where you have read/write permissions: /dev/ and /tmp/. But you won't even need to do that.
+You'll need that weird SSH key (not the pub) from 'ungraspable phantom' so we can SSH into a C2 server.
+Head to your "home" in jail (cell?) and run python3 AnsweringService.py.
+
+This key automatically gets put into the /tmp/messages/ directory and, using ACLs, i modified it so that anything goes there is sent to 600. This lets us use the key. NOTE: this was added after removing busybox because busybox gave them the ability to use chown/chmod, etc., but the TTY issue... Anyway...
+Now you can SSH to root using ssh -i key root@127.0.0.1 or ssh -i key root@localhost and you'll be out of the jail. Easy, right?
+
+Creator note:
+I know now why everyone chooses to make pyjails over linux jails. I kept making mine too secure and I couldn't figure out a breakout!
+If you have ever broken a chroot jail, you know what to look for though:
+permissions (what can I do)
+capabilities (what tools can I use)
+environment (what can I do with the tools I have)
+I also nerfed this a bit by removing the the requirement to use -o StrictHostKeyChecking=no while using SSH. I want people to solve this. I also automatically set the key to be 600 perms so they can run it. Leaving this in their home directory was another clue to this.
+Next Step: Network Forensics (or regular forensics)
+You've broken out of jail. You're in the /root/ home
+You should pick up after yourself, this place is filled with pcaps with the words "what does it mean" and "i must listen" "you must listen" as the names.
+So, clearly, they, too, must listen.
+Should they listen, using tcpdump and then using tshark, they may find repeated messages about the dead man's switch. But Dr. Tom's not here, man.
+But then who was phone?
+It was the whale.
+Kidding, but it's a lightweight NATS message broker on an unsecured line. Whatttt so how do you read this?
+First, capture: tcpdump -i lo -w nats_messages.pcap port 4222 or tcpdump -i lo -w nats_messages.pcap port 4222 -c 100. the -c 100 will stop it running because if they don't and try ctrl+c they'll lose their connection.
+Second, read: tshark -r nats_messages.pcap -T fields -e data | xxd -r -p.
+If they fail to use | xxd -r -p, it'll be in hex, so that's on them to sort out.
+They could read the data, go to cyberchef, throw it in a pot, and then they've got themselves some gumbo.
+It's not encrypted because who thought they'd get found out?
+It seems like all of the messages hint at the C2 server being shutdown, inactive, and stripped of data and explains the jail. Here you need to read the messages - one shows the proper credentials, but coming to 3.221.161.121 - another says they should go to c2revival.drtomlei.xyz.
+
+You could have also just checked ps -ef and seen what was running - and go examine those files. Note: I forgot that I left procps installed so this was entirely by accident. I also had intended to switch you to a non-root home but that's neither here nor there. It just means you had two options.
+
+You can poke around, read the lore in the messages - Dr. Tom and Anna, G0ldenFalc0n7 accusing Dr. TOm of forgetting his birthday... (oh dad!), and a few other things.
+Steganography (STEGANOGRAPHY) - Stage 3
+So, you've got an IP address. What do you do with it? Well, if you read the pcaps/took your own notes, I tried to spell it out pretty simply:"credentials": "MrMilkshake:D0ntLeav3M3H3r3",
+GO to the IP/website listed. I put it in a few messages and also made sure it's actually sent a few times.
+Log in and you'll have a choice to download a few images. The one you want is ExaltedVictoryOfColdHarbor, as indicated in the messages listed previously.
+This is now a steganography challenge.
+I encrypted it using LSB. If you have zsteg, great, zsteg -a ExaltedVictoryOfColdHarbor.png will do the trick. If you don't have zsteg, you can try other methods.
+However, should they waste their time with the other files, they'll be wasting their time for sure...
+Because I put things inside of each of these. One has a .zip with nested directories and ascii art. One has text catted to it, one is hidden in layers... you get the point. The messages said ExaltedVictoryOfColdHarbor, so that's the one you should go for.
+Oh, they could also use this, extract data, rgb 0,0,0
+Hope you all enjoyed it. 
+
+Post Event:
+The docker containers were run 256 times - so a number of you made it there!
+Also, any CTF creator who is curious about how to spawn unique containers on demand, feel free to ask. I'm not sure how everybody does it, but I combined socat with a few other things behind the scenes
