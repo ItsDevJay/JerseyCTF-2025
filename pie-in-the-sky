@@ -1,0 +1,15 @@
+Firstly, it is worth noting that Dublin International's ICAO code is EIDW. This is obtainable from a simple google search.
+
+In the image file of the cockpit, we can observe that the flight computer is also in view. In it contains waypoints, specifically:
+
+BREKI
+BASLU
+PEKUS
+
+When simply searching these waypoints into google, we get multiple results showcasing routes to the airport BIKF. We can also verify this by manually plotting these waypoints, which results in a nearly identical match to (a portion of) the EIDW -> BIKF route
+
+From there, we can simply look up the information along with the airport we found. Something such as "BIKF to EIDW December 30 2024 Gate 104".
+
+From there, we're greeted with this flight. Given how the plane took off at the same time this plane landed, the time would be 11:28 AM GMT.
+
+So, the flag is jctfv{BIKF-11:28:AM}
