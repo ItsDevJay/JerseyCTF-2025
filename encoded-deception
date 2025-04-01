@@ -1,0 +1,6 @@
+1. View page source and open the casefile.js script (view-source:http://encoded-deception.aws.jerseyctf.com/assets/casefiles.js)
+2. First part of the flag is stored in the secretMessage variable encoded as base64
+  const secretMessage = "UGFydCAxOiBqY3RmdntteXN0M3J5"; 
+
+3. Part 2 can be found by looking at the Console output of the response from /info.php, and then looking at header > entries > important (base64)
+  important: "UGFydCAyOiBfMHAzcjR0MTBufQ=="
